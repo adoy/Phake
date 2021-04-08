@@ -451,6 +451,11 @@ class {$newClassName} {$extends}
         return implode(', ', $parameters);
     }
 
+    private function getParameterNameOrGenerateOne(\ReflectionParameter $param)
+    {
+        return $param->getName() ?: 'phake_unnamed_param_' . $param->getPosition();
+    }
+
     /**
      * Generates the code for all the parameters of a given method.
      *
@@ -471,7 +476,7 @@ class {$newClassName} {$extends}
                 break;
             }
             else {
-                $copies .= "if ({$pos} < \$__PHAKE_numArgs) \$__PHAKE_args[] =& \${$parameter->getName()};\n\t\t";
+                $copies .= "if ({$pos} < \$__PHAKE_numArgs) \$__PHAKE_args[] =& \${$this->getParameterNameOrGenerateOne($parameter)};\n\t\t";
             }
         }
 
@@ -573,7 +578,7 @@ class {$newClassName} {$extends}
             $default = ' = null';
         }
 
-        return $type . ($parameter->isPassedByReference() ? '&' : '') . $variadic . '$' . $parameter->getName() . $default;
+        return $type . ($parameter->isPassedByReference() ? '&' : '') . $variadic . '$' . $this->getParameterNameOrGenerateOne($parameter) . $default;
     }
 
     /**
